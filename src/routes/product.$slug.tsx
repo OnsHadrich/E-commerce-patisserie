@@ -23,15 +23,15 @@ export const Route = createFileRoute("/product/$slug")({
 function ProductPage() {
   const { product } = Route.useLoaderData();
   const { add } = useCart();
-  const [size, setSize] = useState(sizes[0].id);
-  const [flavor, setFlavor] = useState(flavors[0].id);
+  const [size, setSize] = useState(sizes[0]!.id);
+  const [flavor, setFlavor] = useState(flavors[0]!.id);
   const [tops, setTops] = useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [notes, setNotes] = useState("");
   const [qty, setQty] = useState(1);
 
-  const sz = sizes.find((x) => x.id === size)!;
-  const fl = flavors.find((x) => x.id === flavor)!;
+  const sz = sizes.find((x) => x.id === size) ?? sizes[0]!;
+  const fl = flavors.find((x) => x.id === flavor) ?? flavors[0]!;
   const tp = toppings.filter((t) => tops.includes(t.id));
   const unit = product.price + (product.customizable ? sz.delta + fl.delta + tp.reduce((s, t) => s + t.delta, 0) : 0);
   const soldOut = product.stock <= 0;

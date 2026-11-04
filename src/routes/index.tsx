@@ -175,7 +175,7 @@ function Index() {
             className="flex gap-2 rounded-full bg-card p-1.5 shadow-card"
             onSubmit={(e) => {
               e.preventDefault();
-              if (!/^\S+@\S+\.\S+$/.test(email)) return toast.error("Please enter a valid email");
+              if (!/^\S+@\S+\.\S+$/.test(email)) { toast.error("Please enter a valid email"); return; }
               toast.info("Newsletter sign-up opens once the store database is connected (next phase).");
             }}
           >
