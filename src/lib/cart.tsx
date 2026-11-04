@@ -8,7 +8,7 @@ export type CartItem = {
   unitPrice: number;
   qty: number;
   options: string[];
-  message?: string;
+  message?: string | undefined;
 };
 
 type Ctx = {
