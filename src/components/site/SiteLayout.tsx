@@ -35,7 +35,7 @@ function Header() {
             <Link
               key={n.label}
               to={n.to}
-              search={"search" in n ? n.search : undefined}
+              {...("search" in n ? { search: n.search } : {})}
               activeOptions={{ exact: true, includeSearch: true }}
               activeProps={{ className: "text-primary" }}
               className="transition-colors hover:text-primary"
@@ -61,7 +61,7 @@ function Header() {
       {open && (
         <nav className="container-x flex flex-col gap-1 pb-4 lg:hidden">
           {nav.map((n) => (
-            <Link key={n.label} to={n.to} search={"search" in n ? n.search : undefined} onClick={() => setOpen(false)} className="rounded-xl px-3 py-2.5 font-medium hover:bg-accent">
+            <Link key={n.label} to={n.to} {...("search" in n ? { search: n.search } : {})} onClick={() => setOpen(false)} className="rounded-xl px-3 py-2.5 font-medium hover:bg-accent">
               {n.label}
             </Link>
           ))}
