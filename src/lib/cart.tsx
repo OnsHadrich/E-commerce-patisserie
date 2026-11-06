@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import type { ItemConfig } from "@/lib/catalog";
 
 export type CartItem = {
   key: string;
@@ -9,6 +10,7 @@ export type CartItem = {
   qty: number;
   options: string[];
   message?: string | undefined;
+  config?: ItemConfig | undefined;
 };
 
 type Ctx = {
@@ -16,6 +18,7 @@ type Ctx = {
   add: (item: Omit<CartItem, "key" | "qty">, qty?: number) => void;
   setQty: (key: string, qty: number) => void;
   remove: (key: string) => void;
+  clear: () => void;
   count: number;
   subtotal: number;
 };
@@ -49,11 +52,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const setQty = (key: string, qty: number) =>
     setItems((prev) => (qty <= 0 ? prev.filter((i) => i.key !== key) : prev.map((i) => (i.key === key ? { ...i, qty } : i))));
   const remove = (key: string) => setItems((prev) => prev.filter((i) => i.key !== key));
+  const clear = () => setItems([]);
 
   const count = items.reduce((s, i) => s + i.qty, 0);
   const subtotal = items.reduce((s, i) => s + i.qty * i.unitPrice, 0);
 
-  return <CartContext.Provider value={{ items, add, setQty, remove, count, subtotal }}>{children}</CartContext.Provider>;
+  return <CartContext.Provider value={{ items, add, setQty, remove, clear, count, subtotal }}>{children}</CartContext.Provider>;
 }
 
 export function useCart() {
