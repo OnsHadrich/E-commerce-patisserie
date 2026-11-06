@@ -14,16 +14,241 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      order_items: {
+        Row: {
+          id: string
+          message: string | null
+          name: string
+          options: string[]
+          order_id: string
+          product_id: string | null
+          qty: number
+          unit_price: number
+        }
+        Insert: {
+          id?: string
+          message?: string | null
+          name: string
+          options?: string[]
+          order_id: string
+          product_id?: string | null
+          qty: number
+          unit_price: number
+        }
+        Update: {
+          id?: string
+          message?: string | null
+          name?: string
+          options?: string[]
+          order_id?: string
+          product_id?: string | null
+          qty?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          address: string | null
+          channel: string
+          created_at: string
+          created_by: string | null
+          customer_name: string | null
+          delivery_date: string | null
+          delivery_fee: number
+          id: string
+          notes: string | null
+          order_number: number
+          payment_method: string
+          payment_status: string
+          phone: string | null
+          status: string
+          subtotal: number
+          total: number
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          customer_name?: string | null
+          delivery_date?: string | null
+          delivery_fee?: number
+          id?: string
+          notes?: string | null
+          order_number?: never
+          payment_method: string
+          payment_status?: string
+          phone?: string | null
+          status?: string
+          subtotal?: number
+          total?: number
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          customer_name?: string | null
+          delivery_date?: string | null
+          delivery_fee?: number
+          id?: string
+          notes?: string | null
+          order_number?: never
+          payment_method?: string
+          payment_status?: string
+          phone?: string | null
+          status?: string
+          subtotal?: number
+          total?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          customizable: boolean
+          description: string
+          id: string
+          image: string
+          name: string
+          occasions: string[]
+          popularity: number
+          price: number
+          rating: number
+          reviews: number
+          slug: string
+          stock: number
+          tags: string[]
+        }
+        Insert: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          customizable?: boolean
+          description?: string
+          id?: string
+          image?: string
+          name: string
+          occasions?: string[]
+          popularity?: number
+          price?: number
+          rating?: number
+          reviews?: number
+          slug: string
+          stock?: number
+          tags?: string[]
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          customizable?: boolean
+          description?: string
+          id?: string
+          image?: string
+          name?: string
+          occasions?: string[]
+          popularity?: number
+          price?: number
+          rating?: number
+          reviews?: number
+          slug?: string
+          stock?: number
+          tags?: string[]
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
+      place_order: {
+        Args: {
+          p_channel: string
+          p_customer?: Json
+          p_items: Json
+          p_payment: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "staff"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +375,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "staff"],
+    },
   },
 } as const
