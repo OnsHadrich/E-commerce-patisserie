@@ -7,7 +7,8 @@ import cupcake from "@/assets/cupcake.jpg";
 import macarons from "@/assets/macarons.jpg";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { ProductCard } from "@/components/site/ProductCard";
-import { products } from "@/lib/catalog";
+import { productsQuery } from "@/lib/catalog";
+import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -49,6 +50,7 @@ function SectionHead({ title, icon: Icon }: { title: string; icon?: typeof Flame
 }
 
 function Index() {
+  const products = useQuery(productsQuery).data ?? [];
   const best = products.filter((p) => p.tags.includes("bestseller")).slice(0, 4);
   const trending = products.filter((p) => p.tags.includes("trending"));
   const fresh = products.filter((p) => p.tags.includes("new"));

@@ -1,4 +1,5 @@
-// Phase 1 catalog. Will be replaced by database-backed products in Phase 2.
+import { queryOptions } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import chocolate from "@/assets/cake-chocolate.jpg";
 import strawberry from "@/assets/cake-strawberry.jpg";
 import redvelvet from "@/assets/cake-redvelvet.jpg";
@@ -8,7 +9,8 @@ import macarons from "@/assets/macarons.jpg";
 import cupcake from "@/assets/cupcake.jpg";
 
 export const CURRENCY = "TND";
-export const formatPrice = (n: number) => `${n.toFixed(2)} ${CURRENCY}`;
+export const formatPrice = (n: number) => `${Number(n).toFixed(2)} ${CURRENCY}`;
+export const DELIVERY_FEE = 7;
 
 export type Category = { slug: string; name: string };
 export const categories: Category[] = [
@@ -21,33 +23,58 @@ export const categories: Category[] = [
 export const occasions = ["Birthday", "Anniversary", "Wedding", "Kids", "Corporate"] as const;
 export type Occasion = (typeof occasions)[number];
 
+const bundled: Record<string, string> = {
+  "cake-chocolate": chocolate,
+  "cake-strawberry": strawberry,
+  "cake-redvelvet": redvelvet,
+  "cake-heart": heart,
+  "cake-mango": mango,
+  macarons,
+  cupcake,
+};
+export const bundledImageKeys = Object.keys(bundled);
+export const imageFor = (key: string) => bundled[key] ?? (key || cupcake);
+
 export type Product = {
+  id: string;
   slug: string;
   name: string;
   category: string;
-  occasions: Occasion[];
+  occasions: string[];
   price: number;
   image: string;
+  imageKey: string;
   description: string;
   rating: number;
   reviews: number;
   popularity: number;
   stock: number;
-  tags: ("bestseller" | "trending" | "new")[];
+  tags: string[];
   customizable: boolean;
+  active: boolean;
 };
 
-export const products: Product[] = [
-  { slug: "chocolate-bliss", name: "Chocolate Bliss Cake", category: "cakes", occasions: ["Birthday", "Corporate"], price: 95, image: chocolate, description: "Dark chocolate sponge, silky ganache drip and hand-piped chocolate rosettes.", rating: 4.8, reviews: 842, popularity: 98, stock: 12, tags: ["bestseller"], customizable: true },
-  { slug: "strawberry-shortcake", name: "Strawberry Shortcake", category: "cakes", occasions: ["Birthday", "Anniversary"], price: 88, image: strawberry, description: "Light vanilla genoise layered with Chantilly cream and fresh strawberries.", rating: 4.9, reviews: 1126, popularity: 96, stock: 8, tags: ["bestseller", "trending"], customizable: true },
-  { slug: "red-velvet-dream", name: "Red Velvet Dream", category: "cakes", occasions: ["Anniversary", "Wedding"], price: 92, image: redvelvet, description: "Velvety cocoa crumb with cream cheese frosting and a ring of rosettes.", rating: 4.7, reviews: 754, popularity: 90, stock: 5, tags: ["bestseller"], customizable: true },
-  { slug: "mango-delight", name: "Mango Delight Cake", category: "cakes", occasions: ["Birthday", "Kids"], price: 85, image: mango, description: "Mango mousse cake with white chocolate drip and fresh mango cubes.", rating: 4.6, reviews: 532, popularity: 84, stock: 0, tags: ["bestseller", "new"], customizable: true },
-  { slug: "vintage-heart", name: "Vintage Heart Cake", category: "cakes", occasions: ["Anniversary", "Wedding"], price: 78, image: heart, description: "Heart-shaped vanilla cake with retro piping and a candied cherry.", rating: 4.9, reviews: 410, popularity: 93, stock: 6, tags: ["trending", "new"], customizable: true },
-  { slug: "macaron-box", name: "Parisian Macaron Box", category: "macarons", occasions: ["Corporate", "Anniversary"], price: 36, image: macarons, description: "Six macarons: raspberry, pistachio and Madagascar vanilla.", rating: 4.8, reviews: 620, popularity: 88, stock: 30, tags: ["trending"], customizable: false },
-  { slug: "cherry-cupcake", name: "Cherry Blossom Cupcake", category: "cupcakes", occasions: ["Kids", "Birthday"], price: 9, image: cupcake, description: "Vanilla cupcake, strawberry buttercream swirl and sprinkles.", rating: 4.7, reviews: 298, popularity: 80, stock: 40, tags: ["trending", "new"], customizable: false },
-];
+type Row = {
+  id: string; slug: string; name: string; category: string; occasions: string[]; price: number; image: string;
+  description: string; rating: number; reviews: number; popularity: number; stock: number; tags: string[];
+  customizable: boolean; active: boolean;
+};
+export const mapProduct = (r: Row): Product => ({
+  ...r,
+  price: Number(r.price),
+  rating: Number(r.rating),
+  imageKey: r.image,
+  image: imageFor(r.image),
+});
 
-export const getProduct = (slug: string) => products.find((p) => p.slug === slug);
+export const productsQuery = queryOptions({
+  queryKey: ["products"],
+  queryFn: async () => {
+    const { data, error } = await supabase.from("products").select("*").order("popularity", { ascending: false });
+    if (error) throw error;
+    return (data as Row[]).map(mapProduct);
+  },
+});
 
 export const sizes = [
   { id: "s", label: "Small · 6 portions", delta: 0 },
@@ -64,3 +91,9 @@ export const toppings = [
   { id: "gold", label: "Gold leaf", delta: 15 },
   { id: "flowers", label: "Edible flowers", delta: 12 },
 ];
+
+/** Builds the payload the database expects for each cart line. */
+export const toOrderItems = (items: { slug: string; qty: number; message?: string | undefined; config?: ItemConfig | undefined }[]) =>
+  items.map((i) => ({ slug: i.slug, qty: i.qty, message: i.message ?? "", ...(i.config ?? {}) }));
+
+export type ItemConfig = { size: string; flavor: string; toppings: string[]; notes: string };

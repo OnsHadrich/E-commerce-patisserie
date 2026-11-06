@@ -3,7 +3,8 @@ import { Search } from "lucide-react";
 import { z } from "zod";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { ProductCard } from "@/components/site/ProductCard";
-import { categories, occasions, products } from "@/lib/catalog";
+import { categories, occasions, productsQuery } from "@/lib/catalog";
+import { useQuery } from "@tanstack/react-query";
 
 const searchSchema = z.object({
   q: z.string().optional(),
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/shop")({
 
 function Shop() {
   const s = Route.useSearch();
+  const { data: products = [], isLoading } = useQuery(productsQuery);
   const navigate = useNavigate({ from: "/shop" });
   const set = (patch: Partial<z.infer<typeof searchSchema>>) => navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
 
@@ -77,7 +79,9 @@ function Shop() {
           {occasions.map((o) => <button key={o} className={chip(s.occasion === o)} onClick={() => set({ occasion: s.occasion === o ? undefined : o })}>{o}</button>)}
         </div>
 
-        {list.length === 0 ? (
+        {isLoading ? (
+          <p className="py-20 text-center text-muted-foreground">Loading treats…</p>
+        ) : list.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-border py-20 text-center">
             <p className="font-display text-2xl">No treats match these filters</p>
             <Link to="/shop" className="mt-3 inline-block text-sm font-semibold text-primary">Clear filters</Link>

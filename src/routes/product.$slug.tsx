@@ -1,27 +1,39 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { Minus, Plus, Star, ChevronLeft } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import { flavors, formatPrice, getProduct, sizes, toppings } from "@/lib/catalog";
+import { flavors, formatPrice, productsQuery, sizes, toppings, type Product } from "@/lib/catalog";
 import { useCart } from "@/lib/cart";
 
 export const Route = createFileRoute("/product/$slug")({
-  loader: ({ params }) => {
-    const product = getProduct(params.slug);
-    if (!product) throw notFound();
-    return { product };
-  },
-  head: ({ loaderData }) => {
-    const t = loaderData ? `${loaderData.product.name} — Maison Rosé` : "Product — Maison Rosé";
-    const d = loaderData?.product.description ?? "Handcrafted pâtisserie.";
+  head: ({ params }) => {
+    const name = params.slug.split("-").map((w) => w[0]?.toUpperCase() + w.slice(1)).join(" ");
+    const t = `${name} — Maison Rosé`;
+    const d = `Order the ${name} from Maison Rosé Pâtisserie, handcrafted and delivered fresh.`;
     return { meta: [{ title: t }, { name: "description", content: d }, { property: "og:title", content: t }, { property: "og:description", content: d }] };
   },
   component: ProductPage,
 });
 
 function ProductPage() {
-  const { product } = Route.useLoaderData();
+  const { slug } = Route.useParams();
+  const { data, isLoading } = useQuery(productsQuery);
+  const product = data?.find((p) => p.slug === slug);
+  if (isLoading) return <SiteLayout><p className="py-32 text-center text-muted-foreground">Loading…</p></SiteLayout>;
+  if (!product) return (
+    <SiteLayout>
+      <div className="py-32 text-center">
+        <p className="font-display text-3xl">This treat isn't available</p>
+        <Link to="/shop" className="mt-4 inline-block font-semibold text-primary">Back to shop</Link>
+      </div>
+    </SiteLayout>
+  );
+  return <ProductView product={product} />;
+}
+
+function ProductView({ product }: { product: Product }) {
   const { add } = useCart();
   const [size, setSize] = useState(sizes[0]!.id);
   const [flavor, setFlavor] = useState(flavors[0]!.id);
@@ -96,7 +108,7 @@ function ProductPage() {
                 disabled={soldOut}
                 onClick={() => {
                   const options = product.customizable ? [sz.label, fl.label, ...tp.map((t) => t.label), ...(notes ? [`Note: ${notes}`] : [])] : [];
-                  add({ slug: product.slug, name: product.name, image: product.image, unitPrice: unit, options, message: message || undefined }, qty);
+                  add({ slug: product.slug, name: product.name, image: product.image, unitPrice: unit, options, message: message || undefined, config: product.customizable ? { size, flavor, toppings: tops, notes } : undefined }, qty);
                   toast.success("Added to your cart");
                 }}
                 className="flex-1 rounded-full bg-primary py-3.5 text-sm font-bold uppercase tracking-wider text-primary-foreground shadow-soft transition-transform hover:scale-[1.02] disabled:opacity-40"
