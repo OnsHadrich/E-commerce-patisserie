@@ -58,7 +58,7 @@ function CartPage() {
               <div className="flex justify-between text-sm"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
               <div className="flex justify-between text-sm"><span>Delivery</span><span>{formatPrice(DELIVERY_FEE)}</span></div>
               <div className="flex justify-between border-t border-border pt-3 text-lg font-bold"><span>Total</span><span>{formatPrice(subtotal + DELIVERY_FEE)}</span></div>
-              <button disabled className="w-full rounded-full bg-primary py-3.5 text-sm font-bold text-primary-foreground opacity-60">Checkout — coming in the next phase</button>
+              <Link to="/checkout" className="block w-full rounded-full bg-primary py-3.5 text-center text-sm font-bold text-primary-foreground">Checkout</Link>
             </aside>
           </div>
         )}
