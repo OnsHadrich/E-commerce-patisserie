@@ -32,7 +32,7 @@ function POS() {
     setBusy(true);
     const { data, error } = await supabase.rpc("place_order", { p_items: entries.map(([slug, qty]) => ({ slug, qty })), p_channel: "pos", p_payment: method });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(`Sale #${(data as { order_number: number }).order_number} recorded`);
     setLines({});
     qc.invalidateQueries({ queryKey: ["products"] });

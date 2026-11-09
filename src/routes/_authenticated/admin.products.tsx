@@ -29,11 +29,11 @@ function AdminProducts() {
 
   const edit = (p: Product) => setForm({ id: p.id, slug: p.slug, name: p.name, category: p.category, price: p.price, stock: p.stock, image: p.imageKey, description: p.description, customizable: p.customizable, active: p.active });
   const save = async () => {
-    if (!form) return;
+    if (!form) return undefined;
     const { id, ...row } = form;
     const payload = { ...row, slug: row.slug || row.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") };
     const { error } = id ? await supabase.from("products").update(payload).eq("id", id) : await supabase.from("products").insert(payload);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Saved");
     setForm(null);
     qc.invalidateQueries({ queryKey: ["products"] });

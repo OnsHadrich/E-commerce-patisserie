@@ -34,7 +34,7 @@ function CheckoutPage() {
     setBusy(true);
     const { data, error } = await supabase.rpc("place_order", { p_items: toOrderItems(items), p_channel: "online", p_payment: "cash", p_customer: form });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     const res = data as { order_number: number };
     clear();
     qc.invalidateQueries({ queryKey: ["products"] });
