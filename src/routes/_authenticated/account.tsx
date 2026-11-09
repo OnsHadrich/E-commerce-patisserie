@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/account")({
 });
 
 function AccountPage() {
-  const { user } = useAuth();
+  const { user, isStaff } = useAuth();
   const qc = useQueryClient();
   const navigate = useNavigate();
   const { data: orders = [] } = useQuery({
@@ -48,6 +48,12 @@ function AccountPage() {
           </button>
         </div>
         <p className="mt-2 text-muted-foreground">{user?.email}</p>
+        {isStaff && (
+          <div className="mt-4 flex gap-2">
+            <Link to="/admin" className="rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground">Dashboard</Link>
+            <Link to="/pos" className="rounded-full border border-primary px-5 py-2 text-sm font-bold text-primary">POS</Link>
+          </div>
+        )}
         <h2 className="mt-10 text-2xl font-semibold">My orders</h2>
         {orders.length === 0 ? (
           <p className="mt-4 text-muted-foreground">No orders yet.</p>
