@@ -43,9 +43,6 @@ function Shop() {
   else if (s.sort === "price-desc") list = [...list].sort((a, b) => b.price - a.price);
   else list = [...list].sort((a, b) => b.popularity - a.popularity);
 
-  const chip = (active: boolean) =>
-    `rounded-full border px-4 py-2 text-sm font-medium transition-colors ${active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:border-primary"}`;
-
   return (
     <SiteLayout>
       <section className="bg-hero py-14">
@@ -72,11 +69,25 @@ function Shop() {
             <option value="price-desc">Price: high to low</option>
           </select>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button className={chip(!s.category)} onClick={() => set({ category: undefined })}>All</button>
-          {categories.map((c) => <button key={c.slug} className={chip(s.category === c.slug)} onClick={() => set({ category: c.slug })}>{c.name}</button>)}
-          <span className="mx-1 w-px bg-border" />
-          {occasions.map((o) => <button key={o} className={chip(s.occasion === o)} onClick={() => set({ occasion: s.occasion === o ? undefined : o })}>{o}</button>)}
+        <div className="flex flex-wrap gap-3">
+          <select
+            value={s.category ?? ""}
+            onChange={(e) => set({ category: e.target.value || undefined })}
+            aria-label="Category"
+            className="rounded-full border border-border bg-card px-4 py-2.5 text-sm"
+          >
+            <option value="">All categories</option>
+            {categories.map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
+          </select>
+          <select
+            value={s.occasion ?? ""}
+            onChange={(e) => set({ occasion: e.target.value || undefined })}
+            aria-label="Occasion"
+            className="rounded-full border border-border bg-card px-4 py-2.5 text-sm"
+          >
+            <option value="">All occasions</option>
+            {occasions.map((o) => <option key={o} value={o}>{o}</option>)}
+          </select>
         </div>
 
         {isLoading ? (
