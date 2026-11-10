@@ -40,9 +40,9 @@ function AdminProducts() {
   };
 
   return (
-    <AdminShell adminOnly>
+    <AdminShell adminOnly title="Products">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Products</h1>
+        <p className="text-sm text-muted-foreground">{products.length} items</p>
         <button onClick={() => setForm({ ...blank })} className="rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground">Add product</button>
       </div>
       {form && (

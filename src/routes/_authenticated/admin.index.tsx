@@ -35,6 +35,7 @@ function AdminOrders() {
   const today = new Date().toDateString();
   const todays = orders.filter((o) => new Date(o.created_at).toDateString() === today && o.status !== "cancelled");
   const revenue = todays.reduce((s, o) => s + Number(o.total), 0);
+  const customers = new Set(orders.map((o) => o.phone || o.customer_name).filter(Boolean)).size;
   const open = orders.filter((o) => ["pending", "preparing", "ready"].includes(o.status)).length;
 
   const update = async (id: string, patch: { status?: string; payment_status?: string }) => {
@@ -44,16 +45,16 @@ function AdminOrders() {
   };
 
   return (
-    <AdminShell>
-      <div className="grid gap-4 sm:grid-cols-3">
-        {[["Today's sales", formatPrice(revenue)], ["Today's orders", todays.length], ["Open orders", open]].map(([l, v]) => (
+    <AdminShell title="Orders overview">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {[["Today's sales", formatPrice(revenue)], ["Today's orders", todays.length], ["Customers", customers], ["Open orders", open]].map(([l, v]) => (
           <div key={l as string} className="rounded-2xl border border-border bg-card p-5 shadow-card">
             <p className="text-sm text-muted-foreground">{l}</p>
             <p className="mt-1 text-2xl font-bold">{v}</p>
           </div>
         ))}
       </div>
-      <h1 className="mt-8 text-2xl font-semibold">Orders</h1>
+      <h2 className="mt-8 text-2xl font-semibold">Recent orders</h2>
       <div className="mt-4 space-y-3">
         {orders.length === 0 && <p className="text-muted-foreground">No orders yet.</p>}
         {orders.map((o) => (
