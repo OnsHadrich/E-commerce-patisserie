@@ -15,7 +15,7 @@ export function AdminShell({ children, adminOnly = false, title }: { children: R
   const allowed = adminOnly ? isAdmin : isStaff;
   const [now, setNow] = useState<Date | null>(null);
   useEffect(() => { setNow(new Date()); const t = setInterval(() => setNow(new Date()), 30000); return () => clearInterval(t); }, []);
-  const name = (user?.user_metadata?.full_name as string | undefined) ?? user?.email ?? "";
+  const name = (user?.user_metadata?.["full_name"] as string | undefined) ?? user?.email ?? "";
 
   return (
     <div className="flex min-h-screen bg-cream">
